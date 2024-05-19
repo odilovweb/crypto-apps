@@ -1,7 +1,7 @@
 const { Telegraf, Markup } = require("telegraf");
 const { keyboard } = require("telegraf/markup");
 
-const bot = new Telegraf("7192749812:AAHN6G9iK0Aliua_oTXrxg82OPhfulRZ01o");
+const bot = new Telegraf("6961359824:AAG4Hd2GqYNiogk5i6U5kmrJlft1Hlpab9A");
 
 const users = [{ id: 1, premium: true }];
 
