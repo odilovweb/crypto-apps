@@ -3,21 +3,78 @@ const { keyboard } = require("telegraf/markup");
 
 const bot = new Telegraf("6961359824:AAG4Hd2GqYNiogk5i6U5kmrJlft1Hlpab9A");
 
-const users = [{ id: 1, premium: true }];
+const users = [
+  { id: 841886966, premium: false, balance: 0 },
+  { id: 5550269002, premium: true, balance: 0 },
+  { id: 993003604, premium: false, balance: 0 },
+  { id: 6791034718, premium: false, balance: 0 },
+  { id: 6818657725, premium: false, balance: 0 },
+  { id: 1954208300, premium: false, balance: 0 },
+  { id: 746252917, premium: false, balance: 0 },
+  { id: 2028047530, premium: false, balance: 0 },
+  { id: 7067645199, premium: false, balance: 0 },
+  { id: 6253141487, premium: false, balance: 0 },
+  { id: 778806941, premium: false, balance: 0 },
+  { id: 1332520178, premium: false, balance: 0 },
+  { id: 850285653, premium: false, balance: 0 },
+  { id: 737316570, premium: false, balance: 0 },
+  { id: 700632653, premium: false, balance: 0 },
+];
 
-bot.hears("/start", async (ctx) => {
+const referralCounts = {}; // For storing referral counts
+const userIds = {}; // For storing user IDs
+
+bot.start(async (ctx) => {
+  const userId = ctx.from.id;
+  const referralId = ctx.payload;
+  let userOr = false;
+  users.forEach((u) => {
+    if (u.id == userId) {
+      userOr = true;
+    }
+  });
+
+  if (referralId && typeof referralCounts[referralId] == "number" && !userOr) {
+    console.log("linked");
+    referralCounts[referralId]++;
+    users.forEach((i) => {
+      if (i.id == ctx.chat.id) {
+        i.balance++;
+      }
+    });
+    ctx.reply(`Thanks for joining via referral! 🎉`);
+    bot.telegram.sendMessage(
+      referralId,
+      `You've got a new referral! Total referrals: ${referralCounts[referralId]}
+      
+      ${
+        ctx.chat.username ? `@${ctx.chat.username}` : `'${ctx.chat.first_name}'`
+      } is joined with your referral link
+
+      `
+    );
+  }
+
+  userIds[userId] = true;
+
   const isUser = users.find((user) => user.id == ctx.chat.id);
   if (!isUser) {
-    users.push({ id: ctx.chat.id, premium: false });
+    users.push({ id: ctx.chat.id, premium: false, balance: 0 });
   }
   await ctx.telegram.sendPhoto(
     ctx.chat.id,
     { source: "fashion.png" },
     {
-      caption: `<b>Hey, @${ctx.chat.username}! Welcome to CryptoApps!</b>
-        
+      caption: `<b>Hey, @${
+        ctx.chat.username ? ctx.chat.username : ctx.chat.first_name
+      }! Welcome to CryptoApps!</b>
+
         In this bot you can use all the applications you need to work with cryptocurrency.
-        
+
+        Welcome, ${
+          ctx.from.first_name
+        }! Use /referral to get your referral link.
+
         Choose the section you need 👇 `,
       parse_mode: "HTML",
       reply_markup: {
@@ -33,10 +90,14 @@ bot.hears("Back Home 🏡", async (ctx) => {
     ctx.chat.id,
     { source: "fashion.png" },
     {
-      caption: `<b>Hey, @${ctx.chat.username}! Welcome to CryptoApps!</b>
-      
+      caption: `<b>Hey, @${
+        ctx.chat.username ? ctx.chat.username : ctx.chat.first_name
+      }! Welcome to CryptoApps!</b>
+
       In this bot you can use all the applications you need to work with cryptocurrency.
-      
+
+      Welcome, ${ctx.from.first_name}! Use /referral to get your referral link.
+
       Choose the section you need 👇 `,
       parse_mode: "HTML",
       reply_markup: {
@@ -108,13 +169,34 @@ bot.hears("Profile 🙎‍♂️", async (ctx) => {
   if (isUser.premium == true) {
     ctx.telegram.sendMessage(
       ctx.chat.id,
-      `Your current version ${isUser.premium}`
+      `Your current version is Premium
+      You have many features.
+      
+      Your friends : <b>${
+        referralCounts[ctx.chat.id] ? referralCounts[ctx.chat.id] : "0"
+      }</b>
+
+      Your current balance:  <b>${
+        referralCounts[ctx.chat.id] ? referralCounts[ctx.chat.id] : "0"
+      } USDT 💰</b>
+      `,
+      { parse_mode: "HTML" }
     );
   } else {
     ctx.telegram.sendMessage(
       ctx.chat.id,
-      "You don't have premium version , you can buy it 👇",
+      `You don't have premium version , you can buy it 👇
+      
+      Your friends : <b>${
+        referralCounts[ctx.chat.id] ? referralCounts[ctx.chat.id] : "0"
+      }</b>
+
+      Your current balance:  <b>${
+        referralCounts[ctx.chat.id] ? referralCounts[ctx.chat.id] : "0"
+      } USDT 💰</b>
+      `,
       {
+        parse_mode: "HTML",
         reply_markup: {
           remove_keyboard: true,
           inline_keyboard: [
@@ -131,13 +213,13 @@ bot.on("callback_query", (query) => {
   if (query.callbackQuery.data === "buy-btn") {
     query.telegram.sendMessage(
       chatId,
-      ` 
+      `
       Premium price is 20 USDT for lifetime.
 
       You can get many additional features and airdrops in the Premium version.
 
       <b>Trc20 address</b> : <em> TUY4oQTkoPKrwJ1nknAXNbRsYTEFcBzVZa</em>
-       
+
 <b>Send a picture of the check after payment 👇</b>
        `,
       { parse_mode: "HTML" }
@@ -154,13 +236,17 @@ bot.on("callback_query", (query) => {
         msg.message.message_id
       );
 
-      msg.telegram.sendMessage(841886966, chatId, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "Give premium", callback_data: "give-premium" }],
-          ],
-        },
-      });
+      msg.telegram.sendMessage(
+        841886966,
+        `${chatId} , balance ${referralCounts[chatId]}`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "Give premium", callback_data: "give-premium" }],
+            ],
+          },
+        }
+      );
     });
   }
 });
@@ -168,13 +254,39 @@ bot.on("callback_query", (query) => {
 bot.hears("/admin", (ctx) => {
   const chatId = ctx.chat.id;
   if (chatId == "841886966") {
-    ctx.telegram.sendMessage(841886966, "You're Admin", {
+    ctx.telegram.sendMessage(841886966, "You're Admin in the bot 🙎‍♂️", {
       reply_markup: {
-        keyboard: [[{ text: "Give premium" }], [{ text: "All users" }]],
+        keyboard: [
+          [{ text: "Give premium" }],
+          [{ text: "All users" }],
+          [{ text: "Send message to all users" }],
+          [{ text: "Send message to user" }],
+        ],
+        resize_keyboard: true,
       },
     });
+
+    bot.hears("Send message to all users", (contex) => {
+      contex.telegram.sendMessage(841886966, "Enter message: ");
+      bot.on("message", (msg) => {
+        users.forEach((i) => {
+          msg.telegram.sendMessage(i.id, msg.message.text, {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Join Channel",
+                    url: "https://t.me/CryptoApps_announcement",
+                  },
+                ],
+              ],
+            },
+          });
+        });
+      });
+    });
+
     bot.hears("Give premium", async (prm) => {
-      console.log("salom");
       await prm.telegram.sendMessage(chatId, "Enter id :");
       await bot.on("message", (msg) => {
         users.forEach((i) => {
@@ -190,17 +302,45 @@ bot.hears("/admin", (ctx) => {
         msg.telegram.sendMessage(841886966, "User got Premium succesfully ✅");
       });
     });
+
     bot.hears("All users", async (contex) => {
       let txt = "all users: ";
       await users.forEach((i) => {
         txt += "{id:";
         txt += `${i.id} ,`;
         txt += "premium:";
-        txt += `${i.premium} }`;
+        txt += `${i.premium}, `;
+        txt += "balance:";
+        txt += `${i.balance} }`;
       });
       contex.telegram.sendMessage(841886966, txt);
     });
   }
+});
+
+// Function to generate referral link
+const generateReferralLink = (userId) =>
+  `https://t.me/CryptoApps_ebot?start=${userId}`;
+
+bot.command("referral", (ctx) => {
+  const userId = ctx.from.id;
+  console.log(userIds[userId]);
+  if (userIds[userId]) {
+    userIds[userId] = true;
+    referralCounts[userId] = 0;
+    console.log(referralCounts);
+  }
+
+  const referralLink = generateReferralLink(userId);
+  console.log(referralCounts);
+  ctx.reply(
+    `<b>This bot allows you to work crypto without leaving Telegram. Click 👇</b>
+
+   ${referralLink} 
+   
+   `,
+    { parse_mode: "HTML" }
+  );
 });
 
 bot.launch();
