@@ -19,6 +19,7 @@ const users = [
   { id: 850285653, premium: false, balance: 0 },
   { id: 737316570, premium: false, balance: 0 },
   { id: 700632653, premium: false, balance: 0 },
+  { id: 822934520, premium: false, balance: 0 },
 ];
 
 const referralCounts = {}; // For storing referral counts
@@ -194,6 +195,8 @@ bot.hears("Profile 🙎‍♂️", async (ctx) => {
       Your current balance:  <b>${
         referralCounts[ctx.chat.id] ? referralCounts[ctx.chat.id] : "0"
       } USDT 💰</b>
+
+      You can use this money to buy Premium version 💎
       `,
       {
         parse_mode: "HTML",
@@ -311,7 +314,7 @@ bot.hears("/admin", (ctx) => {
         txt += "premium:";
         txt += `${i.premium}, `;
         txt += "balance:";
-        txt += `${i.balance} }`;
+        txt += `${i.balance} }, `;
       });
       contex.telegram.sendMessage(841886966, txt);
     });
@@ -320,7 +323,7 @@ bot.hears("/admin", (ctx) => {
 
 // Function to generate referral link
 const generateReferralLink = (userId) =>
-  `https://t.me/CryptoApps_ebot?start=${userId}`;
+  `https://t.me/CryptoAppsbot?start=${userId}`;
 
 bot.command("referral", (ctx) => {
   const userId = ctx.from.id;
