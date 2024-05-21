@@ -20,6 +20,9 @@ const users = [
   { id: 737316570, premium: false, balance: 0 },
   { id: 700632653, premium: false, balance: 0 },
   { id: 822934520, premium: false, balance: 0 },
+  { id: 7026932649, premium: false, balance: 0 },
+  { id: 566420798, premium: false, balance: 0 },
+  { id: 6580508619, premium: false, balance: 0 },
 ];
 
 const referralCounts = {}; // For storing referral counts
@@ -72,9 +75,7 @@ bot.start(async (ctx) => {
 
         In this bot you can use all the applications you need to work with cryptocurrency.
 
-        Welcome, ${
-          ctx.from.first_name
-        }! Use /referral to get your referral link.
+        Use /referral to get your referral link.
 
         Choose the section you need 👇 `,
       parse_mode: "HTML",
@@ -97,7 +98,7 @@ bot.hears("Back Home 🏡", async (ctx) => {
 
       In this bot you can use all the applications you need to work with cryptocurrency.
 
-      Welcome, ${ctx.from.first_name}! Use /referral to get your referral link.
+      Use /referral to get your referral link.
 
       Choose the section you need 👇 `,
       parse_mode: "HTML",
@@ -197,6 +198,8 @@ bot.hears("Profile 🙎‍♂️", async (ctx) => {
       } USDT 💰</b>
 
       You can use this money to buy Premium version 💎
+
+      Get your referral link: /referral
       `,
       {
         parse_mode: "HTML",
