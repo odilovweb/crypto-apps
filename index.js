@@ -1,7 +1,7 @@
 const { Telegraf, Markup } = require("telegraf");
 const { keyboard } = require("telegraf/markup");
 
-const bot = new Telegraf("6961359824:AAG4Hd2GqYNiogk5i6U5kmrJlft1Hlpab9A");
+const bot = new Telegraf("7155277062:AAGvRIw48a556IzWEk42LCKv3u7bmhOSLE8");
 
 const users = [
   { id: 841886966, premium: false, balance: 0 },
@@ -23,6 +23,33 @@ const users = [
   { id: 7026932649, premium: false, balance: 0 },
   { id: 566420798, premium: false, balance: 0 },
   { id: 6580508619, premium: false, balance: 0 },
+  { id: 6426449565, premium: false, balance: 0 },
+  { id: 840223100, premium: false, balance: 0 },
+  { id: 826817926, premium: false, balance: 0 },
+  { id: 6337349498, premium: false, balance: 0 },
+  { id: 584105386, premium: false, balance: 0 },
+  { id: 1798285348, premium: false, balance: 0 },
+  { id: 6272928150, premium: false, balance: 0 },
+  { id: 522460382, premium: false, balance: 0 },
+  { id: 5139593530, premium: false, balance: 0 },
+  { id: 6672865814, premium: false, balance: 0 },
+  { id: 5641087323, premium: false, balance: 0 },
+  { id: 5866952061, premium: false, balance: 0 },
+  { id: 705337343, premium: false, balance: 0 },
+  { id: 6501975909, premium: false, balance: 0 },
+  { id: 1763307809, premium: false, balance: 0 },
+  { id: 10317808, premium: false, balance: 0 },
+  { id: 604326284, premium: false, balance: 0 },
+  { id: 1809151911, premium: false, balance: 0 },
+  { id: 6477038451, premium: false, balance: 0 },
+  { id: 5907817074, premium: false, balance: 0 },
+  { id: 629631609, premium: false, balance: 0 },
+  { id: 5409007786, premium: false, balance: 0 },
+  { id: 6154867116, premium: false, balance: 0 },
+  { id: 775402973, premium: false, balance: 0 },
+  { id: 5223749586, premium: false, balance: 0 },
+  { id: 726451578, premium: false, balance: 0 },
+  { id: 6329749260, premium: false, balance: 0 },
 ];
 
 const referralCounts = {}; // For storing referral counts
@@ -32,17 +59,19 @@ bot.start(async (ctx) => {
   const userId = ctx.from.id;
   const referralId = ctx.payload;
   let userOr = false;
+
   users.forEach((u) => {
     if (u.id == userId) {
       userOr = true;
+      referralCounts[userId] = u.balance;
     }
   });
 
   if (referralId && typeof referralCounts[referralId] == "number" && !userOr) {
-    console.log("linked");
     referralCounts[referralId]++;
     users.forEach((i) => {
-      if (i.id == ctx.chat.id) {
+      console.log(ctx.chat.id, i.id);
+      if (i.id == referralId) {
         i.balance++;
       }
     });
@@ -58,7 +87,12 @@ bot.start(async (ctx) => {
       `
     );
   }
-
+  if (referralId && typeof referralCounts[referralId] !== "number") {
+    ctx.telegram.sendMessage(
+      referralId,
+      `Your referrals are not being counted, click /referral`
+    );
+  }
   userIds[userId] = true;
 
   const isUser = users.find((user) => user.id == ctx.chat.id);
@@ -167,7 +201,11 @@ bot.hears("Crypto Apps 🎮", async (ctx) => {
 
 bot.hears("Profile 🙎‍♂️", async (ctx) => {
   const isUser = users.find((user) => user.id == ctx.chat.id);
-  console.log(users);
+  users.forEach((u) => {
+    if (u.id == ctx.chat.id) {
+      referralCounts[ctx.chat.id] = u.balance;
+    }
+  });
   if (isUser.premium == true) {
     ctx.telegram.sendMessage(
       ctx.chat.id,
@@ -230,6 +268,7 @@ bot.on("callback_query", (query) => {
        `,
       { parse_mode: "HTML" }
     );
+
     bot.on("photo", (msg) => {
       console.log(msg.message.photo);
       msg.telegram.sendMessage(
@@ -244,7 +283,7 @@ bot.on("callback_query", (query) => {
 
       msg.telegram.sendMessage(
         841886966,
-        `${chatId} , balance ${referralCounts[chatId]}`,
+        `${msg.chat.id} , balance ${referralCounts[msg.chat.id]}`,
         {
           reply_markup: {
             inline_keyboard: [
@@ -309,8 +348,85 @@ bot.hears("/admin", (ctx) => {
       });
     });
 
+    bot.hears("Send message to user", (contex) => {
+      let id = null;
+      let premium = null;
+      let balance = null;
+
+      bot.hears("Set premium 💎", (msg) => {
+        users.forEach((i) => {
+          if (i.id == id) {
+            i.premium = true;
+          }
+        });
+        msg.telegram.sendMessage(
+          id,
+          `Payment has been confirmed ✅
+          You have purchased the premium version 😍🎊`
+        );
+
+        msg.telegram.sendMessage(841886966, "User got Premium succesfully ✅");
+      });
+
+      bot.hears("Unset premium 💎", (msg) => {
+        users.forEach((i) => {
+          if (i.id == id) {
+            i.premium = false;
+          }
+        });
+        msg.telegram.sendMessage(
+          id,
+          `You have disabled the premium version 😢`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "Buy Premium 💎", callback_data: "buy-btn" }],
+              ],
+            },
+          }
+        );
+
+        msg.telegram.sendMessage(
+          841886966,
+          "The premium version has been removed from the user ✅"
+        );
+      });
+
+      contex.telegram.sendMessage(contex.chat.id, "Enter id: ");
+
+      bot.on("message", async (msg) => {
+        await users.forEach((u) => {
+          if (u.id == msg.message.text) {
+            id = u.id;
+            premium = u.premium;
+            balance = u.balance;
+
+            contex.telegram.sendMessage(
+              contex.chat.id,
+              `
+          id: <b> ${id}</b>
+  premium: <b> ${premium ? `Bor ✅` : `Yo'q ❌`}</b>
+  balance: <b> ${balance}</b>
+          `,
+              {
+                parse_mode: "HTML",
+                reply_markup: {
+                  remove_keyboard: true,
+                  resize_keyboard: true,
+                  keyboard: [
+                    [{ text: "Set premium 💎" }],
+                    [{ text: "Unset premium 💎" }],
+                  ],
+                },
+              }
+            );
+          }
+        });
+      });
+    });
+
     bot.hears("All users", async (contex) => {
-      let txt = "all users: ";
+      let txt = "";
       await users.forEach((i) => {
         txt += "{id:";
         txt += `${i.id} ,`;
@@ -330,10 +446,16 @@ const generateReferralLink = (userId) =>
 
 bot.command("referral", (ctx) => {
   const userId = ctx.from.id;
+  let balance = 0;
+  users.forEach((i) => {
+    if (i.id == userId) {
+      balance = i.balance;
+    }
+  });
   console.log(userIds[userId]);
   if (userIds[userId]) {
     userIds[userId] = true;
-    referralCounts[userId] = 0;
+    referralCounts[userId] = balance;
     console.log(referralCounts);
   }
 
