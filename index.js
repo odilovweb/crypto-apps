@@ -1,7 +1,7 @@
 const { Telegraf, Markup } = require("telegraf");
 const { keyboard } = require("telegraf/markup");
 
-const bot = new Telegraf("7155277062:AAGvRIw48a556IzWEk42LCKv3u7bmhOSLE8");
+const bot = new Telegraf("6961359824:AAG4Hd2GqYNiogk5i6U5kmrJlft1Hlpab9A");
 
 const users = [
   { id: 841886966, premium: false, balance: 0 },
@@ -225,9 +225,7 @@ bot.hears("Profile 🙎‍♂️", async (ctx) => {
   } else {
     ctx.telegram.sendMessage(
       ctx.chat.id,
-      `You don't have premium version , you can buy it 👇
-      
-      Your friends : <b>${
+      `Your friends : <b>${
         referralCounts[ctx.chat.id] ? referralCounts[ctx.chat.id] : "0"
       }</b>
 
@@ -238,6 +236,8 @@ bot.hears("Profile 🙎‍♂️", async (ctx) => {
       You can use this money to buy Premium version 💎
 
       Get your referral link: /referral
+      
+      You don't have premium version , you can buy it 👇
       `,
       {
         parse_mode: "HTML",
